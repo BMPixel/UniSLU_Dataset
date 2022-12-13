@@ -1,0 +1,1 @@
+atis_distance atis_flight_no atis_aircraft atis_restriction atis_city atis_capacity atis_airfare atis_ground_service atis_cheapest atis_ground_fare atis_quantity atis_abbreviation atis_day_name atis_flight atis_flight_time atis_airline atis_airport atis_meal
