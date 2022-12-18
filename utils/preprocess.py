@@ -4,6 +4,15 @@ import pandas as pd
 import numpy as np
 import json
 
+ATIS_DATASET = 'ATIS'
+BANKING_DATASET = 'Banking-8k'
+CAIS_DATASET = 'CAIS'
+ECDT_DATASET = 'ECDT'
+HWU_DATASET = 'HWU64'
+MATIS_DATASET = 'MixATIS'
+MSNIPS_DATASET = 'MixSNIPS'
+TOP_DATASET = 'TOP'
+
 
 def assemble_output_sequence(utterance: str, slots: dict, intent: str):
     '''Assemble utterance, slots and intent into a unified output sequences'''
@@ -124,7 +133,7 @@ def load_ecdt_dataset(path='raw_datasets/ECDT', train_dev_test_ratio=[0.8, 0.1, 
 
 
 def load_mix_dataset(path='raw_datasets/MixIntent/MixATIS_clean'):
-    '''Load ATIS dataset from given dictionary'''
+    """Load ATIS dataset from given dictionary"""
     intents = set()
     datasets = {}
     for dataset_name in ['dev', 'test', 'train']:
@@ -145,12 +154,7 @@ def load_mix_dataset(path='raw_datasets/MixIntent/MixATIS_clean'):
 
 
 def load_top_dataset(path='raw_datasets/TOPv2'):
-    """Load a TopV2 dataset
-
-    :param path: dataset path, defaults to 'raw_datasets/TOPv2'
-    :type path: str, optional
-    :return: dataset object
-    """
+    """Load TopV2 dataset"""
     datasets = {}
     domains = ['alarm', 'event', 'messaging', 'music',
                'navigation', 'reminder', 'timer', 'weather']
@@ -182,7 +186,9 @@ def load_top_dataset(path='raw_datasets/TOPv2'):
     return train, dev, test, list(intents)
 
 
-def load_hwu64_dataset(path='raw_datasets/HWU64', train_dev_test_ratio=[.8, .1, .1]):
+def load_hwu64_dataset(path='raw_datasets/HWU64',
+                       train_dev_test_ratio=[.8, .1, .1]):
+    """Load HWU64 dataset and return DataFrames"""
     intents = set()
     df = pd.read_csv(os.path.join(path, 'all.txt'), sep=';').reset_index()
 
@@ -218,6 +224,7 @@ def load_hwu64_dataset(path='raw_datasets/HWU64', train_dev_test_ratio=[.8, .1, 
 
 
 def _read_one_cais_sample(f_tag, f_in):
+    """Read one CAIS sample"""
     sentence = []
     taggings = []
     line = f_tag.readline().strip()
@@ -248,6 +255,7 @@ def _read_one_cais_sample(f_tag, f_in):
 
 
 def load_cais_dataset(path='raw_datasets/CAIS'):
+    """Load CAIS dataset and return DataFrames"""
     intents = set()
     datasets = {}
     for dataset_name in ['valid', 'test', 'train']:
@@ -277,72 +285,37 @@ def load_cais_dataset(path='raw_datasets/CAIS'):
 
     return train, valid, test, list(intents)
 
-# train, dev, test, intents = load_atis_dataset()
-# train.to_csv('processed_datasets/ATIS/train.tsv', sep='\t', index=False)
-# dev.to_csv('processed_datasets/ATIS/dev.tsv', sep='\t', index=False)
-# test.to_csv('processed_datasets/ATIS/test.tsv', sep='\t', index=False)
-# with open('processed_datasets/ATIS/intent.txt', 'w') as f:
-#     f.write(' '.join(intents))
-# print('Successfully processed ATIS dataset!')
 
+def preprocess_dataset(name, output_dir='processed_datasets'):
+    """Read abitery dataset using above methods
+    And write into given folder"""
+    if name == ATIS_DATASET:
+        train, dev, test, intents = load_atis_dataset()
+    elif name == BANKING_DATASET:
+        train, dev, test, intents = load_banking_dataset()
+    elif name == ECDT_DATASET:
+        train, dev, test, intents = load_ecdt_dataset()
+    elif name == MATIS_DATASET:
+        train, dev, test, intents = load_mix_dataset()
+    elif name == MSNIPS_DATASET:
+        train, dev, test, intents = load_mix_dataset(
+            path='raw_datasets/MixIntent/MixSNIPS_clean')
+    elif name == TOP_DATASET:
+        train, dev, test, intents = load_top_dataset()
+    elif name == HWU_DATASET:
+        train, dev, test, intents = load_hwu64_dataset()
+    elif name == CAIS_DATASET:
+        train, dev, test, intents = load_cais_dataset()
+    else:
+        raise ValueError(f'{name} not a valid dataset')
 
-# train, dev, test, intents = load_banking_dataset()
-# train.to_csv('processed_datasets/Banking-8k/train.tsv', sep='\t', index=False)
-# dev.to_csv('processed_datasets/Banking-8k/dev.tsv', sep='\t', index=False)
-# test.to_csv('processed_datasets/Banking-8k/test.tsv', sep='\t', index=False)
-# with open('processed_datasets/Banking-8k/intent.txt', 'w') as f:
-#     f.write(' '.join(intents))
-# print('Successfully processed Banking dataset!')
-
-
-# train, dev, test, intents = load_ecdt_dataset()
-# train.to_csv('processed_datasets/ECDT/train.tsv', sep='\t', index=False)
-# dev.to_csv('processed_datasets/ECDT/dev.tsv', sep='\t', index=False)
-# test.to_csv('processed_datasets/ECDT/test.tsv', sep='\t', index=False)
-# with open('processed_datasets/ECDT/intent.txt', 'w') as f:
-#     f.write(' '.join(intents))
-# print('Successfully processed ECDT dataset!')
-
-
-# train, dev, test, intents = load_mix_dataset()
-# train.to_csv('processed_datasets/MixATIS/train.tsv', sep='\t', index=False)
-# dev.to_csv('processed_datasets/MixATIS/dev.tsv', sep='\t', index=False)
-# test.to_csv('processed_datasets/MixATIS/test.tsv', sep='\t', index=False)
-# with open('processed_datasets/MixATIS/intent.txt', 'w') as f:
-#     f.write(' '.join(intents))
-# print('Successfully processed MixATIS dataset!')
-
-
-# train, dev, test, intents = load_mix_dataset(
-#     path='raw_datasets/MixIntent/MixSNIPS_clean')
-# train.to_csv('processed_datasets/MixSNIPS/train.tsv', sep='\t', index=False)
-# dev.to_csv('processed_datasets/MixSNIPS/dev.tsv', sep='\t', index=False)
-# test.to_csv('processed_datasets/MixSNIPS/test.tsv', sep='\t', index=False)
-# with open('processed_datasets/MixSNIPS/intent.txt', 'w') as f:
-#     f.write(' '.join(intents))
-# print('Successfully processed MixSNIPS dataset!')
-
-
-# train, dev, test, intents = load_top_datset()
-# train.to_csv('processed_datasets/TOP/train.tsv', sep='\t', index=False)
-# dev.to_csv('processed_datasets/TOP/dev.tsv', sep='\t', index=False)
-# test.to_csv('processed_datasets/TOP/test.tsv', sep='\t', index=False)
-# with open('processed_datasets/TOP/intent.txt', 'w') as f:
-#     f.write(' '.join(intents))
-# print('Successfully processed TOP dataset!')
-
-# train, dev, test, intents = load_hwu64_dataset()
-# train.to_csv('processed_datasets/HWU64/train.tsv', sep='\t', index=False)
-# dev.to_csv('processed_datasets/HWU64/dev.tsv', sep='\t', index=False)
-# test.to_csv('processed_datasets/HWU64/test.tsv', sep='\t', index=False)
-# with open('processed_datasets/HWU64/intent.txt', 'w') as f_tag:
-#     f_tag.write(' '.join(intents))
-# print('Successfully processed HWU64 dataset!')
-
-train, dev, test, intents = load_cais_dataset()
-train.to_csv('processed_datasets/CAIS/train.tsv', sep='\t', index=False)
-dev.to_csv('processed_datasets/CAIS/dev.tsv', sep='\t', index=False)
-test.to_csv('processed_datasets/CAIS/test.tsv', sep='\t', index=False)
-with open('processed_datasets/CAIS/intent.txt', 'w') as f_tag:
-    f_tag.write(' '.join(intents))
-print('Successfully processed CAIS dataset!')
+    os.makedirs(os.path.join(output_dir, name), exist_ok=True)
+    train.to_csv(os.path.join(output_dir, name, 'train.tsv'),
+                 sep='\t', index=False)
+    dev.to_csv(os.path.join(output_dir, name, 'dev.tsv'),
+               sep='\t', index=False)
+    test.to_csv(os.path.join(output_dir, name, 'test.tsv'),
+                sep='\t', index=False)
+    with open(os.path.join(output_dir, name, 'intents.txt'), 'w') as f_tag:
+        f_tag.write(' '.join(intents))
+    print(f'Successfully processed {name} dataset!')
